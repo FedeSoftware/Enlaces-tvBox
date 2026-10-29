@@ -1,152 +1,926 @@
-<!doctype html>
+
+<!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Launcher multimedia</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pantalla principal</title>
+
 <style>
-  :root{
-    --text:#fff;
-    --glass:rgba(18,24,31,.76);
-    --glass-hover:rgba(25,34,43,.92);
-    --line:rgba(255,255,255,.24);
-    --accent:#f3c74f;
-  }
-  *{box-sizing:border-box}
-  html,body{margin:0;width:100%;height:100%;font-family:Arial,Helvetica,sans-serif;color:var(--text)}
-  body{
-    min-height:100vh;
-    overflow:hidden;
-    background:#20252b url("https://i.postimg.cc/jt24Jqr7/shane-hoving-I1j5BPwm-Q-unsplash.jpg") center center / cover no-repeat fixed;
-  }
-  /* Reemplazá fondo.jpg por el nombre de tu imagen horizontal, o dejala junto a este HTML. */
-  .shade{position:fixed;inset:0;background:linear-gradient(135deg,rgba(0,0,0,.46),rgba(0,0,0,.12) 55%,rgba(0,0,0,.48));pointer-events:none}
-  .launcher{
-    position:relative;z-index:1;
-    width:100%;height:100vh;height:100dvh;
-    max-height:100vh;
-    padding:clamp(10px,2.2vh,20px) clamp(14px,3vw,38px);
-    display:flex;flex-direction:column;gap:clamp(10px,2vh,18px);
-  }
-  .warning{
-    display:flex;align-items:center;justify-content:center;gap:12px;
-    padding:clamp(9px,1.6vh,14px) 18px;
-    border:1px solid rgba(255,220,100,.6);
-    border-radius:14px;
-    background:rgba(22,25,28,.82);
-    box-shadow:0 8px 24px rgba(0,0,0,.2);
-    font-size:clamp(12px,1.55vw,19px);font-weight:700;text-align:center;
-    line-height:1.25;
-  }
-  .warning-icon{font-size:clamp(20px,2.3vw,28px);flex:none}
-  .heading{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 4px}
-  .heading h1{font-size:clamp(19px,2.6vw,30px);margin:0;text-shadow:0 2px 8px #0008;letter-spacing:.02em}
-  .heading span{font-size:clamp(10px,1.25vw,14px);opacity:.9;text-shadow:0 2px 8px #000}
-  .tiles{
-    flex:1;min-height:0;
-    display:grid;
-    grid-template-columns:repeat(4,minmax(0,1fr));
-    grid-template-rows:repeat(2,minmax(0,1fr));
-    gap:clamp(10px,1.8vw,20px);
-  }
-  .tile{
-    min-width:0;min-height:0;position:relative;overflow:hidden;
-    display:flex;flex-direction:column;align-items:center;justify-content:center;
-    gap:clamp(8px,1.5vh,15px);
-    padding:clamp(10px,1.5vw,20px);
-    color:#fff;text-decoration:none;text-align:center;
-    border:1px solid var(--line);border-radius:clamp(14px,1.7vw,22px);
-    background:var(--glass);
-    box-shadow:0 10px 28px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.09);
-    backdrop-filter:blur(7px);
-    transition:transform .16s ease,background .16s ease,border-color .16s ease;
-    outline-offset:4px;
-  }
-  .tile:hover,.tile:focus-visible{background:var(--glass-hover);border-color:rgba(255,255,255,.65);transform:translateY(-3px) scale(1.015)}
-  .tile:active{transform:scale(.985)}
-  .logo{
-    width:clamp(48px,7.4vw,82px);height:clamp(48px,7.4vw,82px);
-    display:flex;align-items:center;justify-content:center;flex:none;
-    border-radius:23%;font-size:clamp(23px,3.6vw,42px);font-weight:900;
-    box-shadow:0 6px 18px rgba(0,0,0,.25);
-    text-shadow:0 1px 2px #0003;
-  }
-  .logo svg{width:58%;height:58%;fill:currentColor}
-  .name{font-size:clamp(14px,1.8vw,22px);font-weight:800;line-height:1.12;text-wrap:balance}
-  .hint{font-size:clamp(10px,1.15vw,13px);opacity:.75}
-  .music{background:#f9f9f9;color:#111}.youtube{background:#ff0033;color:white}
-  .google{background:#fff;color:#4285f4}.cosine{background:#d9f2e5;color:#173b32}
-  .beatport{background:#90ef00;color:#111}.traxsource{background:#1a1d22;color:#f5a623}
-  .anses{background:#1769aa;color:#fff}
-  .bottom-note{font-size:clamp(10px,1.2vw,13px);text-align:center;text-shadow:0 2px 8px #000;opacity:.9}
-  @media(max-width:700px){
-    .launcher{padding:10px;gap:9px}
-    .tiles{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(4,minmax(0,1fr));gap:9px}
-    .heading span{display:none}
-    .tile{flex-direction:row;justify-content:flex-start;text-align:left;padding:10px;gap:12px}
-    .logo{width:clamp(38px,11vw,60px);height:clamp(38px,11vw,60px);font-size:clamp(19px,5vw,30px)}
-    .name{font-size:clamp(13px,3.4vw,18px)}
-    .hint{display:none}
-  }
-  @media(max-height:560px){
-    .launcher{padding:7px 16px;gap:7px}
-    .warning{padding:6px 10px}
-    .heading h1{font-size:18px}
-    .tiles{gap:8px}
-    .tile{gap:6px;padding:7px}
-    .logo{width:42px;height:42px;font-size:23px}
-    .name{font-size:14px}
-    .hint,.bottom-note{display:none}
-  }
-  @media(prefers-reduced-motion:reduce){.tile{transition:none}}
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    width: 100%;
+    min-height: 100%;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #ffffff;
+    color: #333333;
+}
+
+body {
+    overflow: hidden;
+}
+
+/* PANTALLA PRINCIPAL */
+
+#principal {
+    position: relative;
+    width: 100%;
+    height: 720px;
+    max-height: 100vh;
+    min-height: 520px;
+    overflow: hidden;
+    background: #ffffff;
+}
+
+.menu {
+    position: absolute;
+    top: 20px;
+    left: 18px;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 9px;
+    max-height: calc(100% - 35px);
+    overflow-y: auto;
+    padding: 2px 8px 12px 2px;
+}
+
+.boton {
+    display: block;
+    width: 160px;
+    min-width: 160px;
+    padding: 9px 13px;
+    border: 1px solid #d1d1d1;
+    border-radius: 4px;
+    background: #f3f3f3;
+    color: #292929;
+    text-align: left;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+}
+
+.boton:hover,
+.boton:focus {
+    background: #e8e8e8;
+    border-color: #999999;
+    outline: none;
+}
+
+.boton-ayuda {
+    background: #fff3cc;
+    border-color: #e5d19a;
+}
+
+.boton-ayuda:hover,
+.boton-ayuda:focus {
+    background: #f9e8b0;
+}
+
+/* PERSONAJE CON TRANSICIÓN */
+
+.personaje-contenedor {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 68%;
+    height: 96%;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.personaje {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: right bottom;
+    opacity: 0;
+    transition: opacity 450ms ease-in-out;
+}
+
+.personaje.activo {
+    opacity: 1;
+}
+
+/* AYUDA */
+
+#ayuda {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 20;
+    background: rgba(0,0,0,0.38);
+    padding: 14px;
+}
+
+#ayuda.visible {
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+}
+
+.ventana-ayuda {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 850px;
+    max-height: 100%;
+    border: 1px solid #d6c89f;
+    border-radius: 5px;
+    background: #fff9e9;
+    box-shadow: 0 5px 25px rgba(0,0,0,0.22);
+    overflow: hidden;
+}
+
+.cabecera-ayuda {
+    flex-shrink: 0;
+    padding: 13px 18px;
+    background: #f1e5c6;
+    border-bottom: 1px solid #d8cba8;
+}
+
+.cabecera-ayuda h1 {
+    margin: 0;
+    font-size: 20px;
+    color: #554b37;
+}
+
+.contenido-ayuda {
+    overflow-y: auto;
+    padding: 18px 22px 28px;
+    background-color: #fff9e9;
+    background-image: repeating-linear-gradient(
+        to bottom,
+        transparent 0,
+        transparent 27px,
+        rgba(180,160,120,0.17) 28px
+    );
+    line-height: 1.55;
+    -webkit-overflow-scrolling: touch;
+}
+
+.contenido-ayuda h2 {
+    margin: 25px 0 9px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #d9cba8;
+    color: #51452e;
+    font-size: 18px;
+}
+
+.contenido-ayuda h2:first-child {
+    margin-top: 0;
+}
+
+.contenido-ayuda h3 {
+    margin: 16px 0 5px;
+    font-size: 15px;
+    color: #665638;
+}
+
+.contenido-ayuda p {
+    margin: 8px 0 12px;
+}
+
+.contenido-ayuda ul {
+    padding-left: 23px;
+    margin-top: 5px;
+}
+
+.contenido-ayuda li {
+    margin-bottom: 6px;
+}
+
+.boton-volver {
+    flex-shrink: 0;
+    margin: 12px 18px 16px;
+    padding: 11px 16px;
+    border: 1px solid #a8a8a8;
+    border-radius: 4px;
+    background: #e8e8e8;
+    color: #333333;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.boton-volver:hover {
+    background: #dcdcdc;
+}
+
+/* IMAGEN GENERAL DE LOS CONTROLES */
+
+.imagen-controles {
+    display: block;
+    width: 100%;
+    height: 180px;
+    margin: 12px 0;
+    object-fit: contain;
+    object-position: left center;
+}
+
+/* ICONOS INDIVIDUALES DE ANDROID */
+
+.iconos-android {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 15px 0 20px;
+}
+
+.icono-android {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 45px;
+}
+
+.icono-android img {
+    display: block;
+    flex-shrink: 0;
+    width: 45px;
+    height: 45px;
+    object-fit: contain;
+}
+
+.icono-android span {
+    font-weight: normal;
+}
+
+/* IMAGEN DE LA BARRA DE CHROME */
+
+.imagen-encabezado-chrome {
+    display: block;
+    width: 100%;
+    height: auto;
+    margin: 12px 0 18px;
+    object-fit: contain;
+}
+
+/* ADAPTACIÓN A PANTALLAS CHICAS */
+
+@media (max-width: 600px) {
+    #principal {
+        min-height: 480px;
+    }
+
+    .menu {
+        top: 12px;
+        left: 10px;
+        gap: 7px;
+    }
+
+    .boton {
+        width: 160px;
+        min-width: 160px;
+        padding: 8px 10px;
+        font-size: 12px;
+    }
+
+    .personaje-contenedor {
+        width: 76%;
+        height: 85%;
+    }
+
+    #ayuda {
+        padding: 5px;
+    }
+
+    .contenido-ayuda {
+        padding: 14px;
+    }
+
+    .cabecera-ayuda h1 {
+        font-size: 18px;
+    }
+}
 </style>
 </head>
+
 <body>
-<div class="shade"></div>
-<main class="launcher">
-  <div class="warning" role="note" aria-label="Advertencia de memoria">
-    <span class="warning-icon" aria-hidden="true">⚠️</span>
-    <span>mantener pestañas cerradas apretando en la X para el uso óptimo de memoria del TV Box</span>
-  </div>
-  <header class="heading">
-    <h1>Accesos directos</h1>
-    <span>Elegí una aplicación para abrirla</span>
-  </header>
-  <nav class="tiles" aria-label="Accesos a sitios web">
-    <a class="tile" href="https://music.youtube.com/" target="_blank" rel="noopener noreferrer">
-      <span class="logo music" aria-hidden="true">
-        <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm0 3.2a6.8 6.8 0 1 1 0 13.6 6.8 6.8 0 0 1 0-13.6Zm-2.1 3.1v7.4l6-3.7-6-3.7Z"/></svg>
-      </span>
-      <span class="name">YouTube Music</span><span class="hint">Entra a YouTubeMusic.com mediante Chrome</span>
-    </a>
-    <a class="tile" href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer">
-      <span class="logo youtube" aria-hidden="true">
-        <svg viewBox="0 0 24 24"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8ZM9.6 15.6V8.4l6.3 3.6-6.3 3.6Z"/></svg>
-      </span>
-      <span class="name">YouTube</span><span class="hint">Entra a YouTube.com mediante Chrome</span>
-    </a>
-    <a class="tile" href="https://www.google.com/" target="_blank" rel="noopener noreferrer">
-      <span class="logo google" aria-hidden="true">G</span>
-      <span class="name">Buscador Web de Google</span><span class="hint">Buscador de Google Chrome</span>
-    </a>
-    <a class="tile" href="https://cosine.club/" target="_blank" rel="noopener noreferrer">
-      <span class="logo cosine" aria-hidden="true">C.</span>
-      <span class="name">Cosine Club</span><span class="hint">Busca musica similar mediante ia</span>
-    </a>
-    <a class="tile" href="https://www.beatport.com/" target="_blank" rel="noopener noreferrer">
-      <span class="logo beatport" aria-hidden="true">B</span>
-      <span class="name">Beatport</span><span class="hint">Catálogo de Musica</span>
-    </a>
-    <a class="tile" href="https://www.traxsource.com/" target="_blank" rel="noopener noreferrer">
-      <span class="logo traxsource" aria-hidden="true">T</span>
-      <span class="name">Traxsource</span><span class="hint">Catálogo de Musica</span>
-    </a>
-    <a class="tile" href="https://www.anses.gob.ar/" target="_blank" rel="noopener noreferrer">
-      <span class="logo anses" aria-hidden="true">ANSES</span>
-      <span class="name">ANSES</span><span class="hint">Trámites y consultas</span>
-    </a>
-  </nav>
-  <div class="bottom-note">Launcher web · Seleccioná un acceso para abrirlo en una pestaña nueva</div>
+
+<!-- PANTALLA PRINCIPAL -->
+
+<main id="principal">
+
+    <nav class="menu" aria-label="Accesos principales">
+
+        <a class="boton"
+           href="https://music.youtube.com/"
+           target="_blank"
+           rel="noopener"
+           data-personaje="imagenes/youtube-music.jpg">
+           🎵 YouTube Music
+        </a>
+
+        <a class="boton"
+           href="https://www.youtube.com/"
+           target="_blank"
+           rel="noopener"
+           data-personaje="imagenes/youtube.jpg">
+           ▶ YouTube
+        </a>
+
+        <a class="boton"
+           href="https://www.google.com/"
+           target="_blank"
+           rel="noopener"
+           data-personaje="imagenes/google.jpg">
+           🌐 Google
+        </a>
+
+        <a class="boton"
+           href="https://www.anses.gob.ar/"
+           target="_blank"
+           rel="noopener"
+           data-personaje="imagenes/anses.jpg">
+           🏛 ANSES
+        </a>
+
+        <a class="boton"
+           href="https://www.google.com/search?q=calculadora"
+           target="_blank"
+           rel="noopener"
+           data-personaje="imagenes/calculadora.jpg">
+           🧮 Calculadora
+        </a>
+
+        <a class="boton"
+           href="https://www.google.com/search?q=clima+Gar%C3%ADn+Buenos+Aires"
+           target="_blank"
+           rel="noopener"
+           data-personaje="imagenes/clima.jpg">
+           🌤 Clima
+        </a>
+
+        <a class="boton"
+           href="https://news.google.com/home?hl=es-419&gl=AR&ceid=AR%3Aes-419"
+           target="_blank"
+           rel="noopener"
+           data-personaje="imagenes/noticias.jpg">
+           📰 Noticias
+        </a>
+
+        <button class="boton boton-ayuda"
+                type="button"
+                id="abrirAyuda"
+                data-personaje="imagenes/ayuda.jpg">
+           ❔ Ayuda
+        </button>
+
+    </nav>
+
+    <div class="personaje-contenedor">
+        <img
+            id="personajeA"
+            class="personaje activo"
+            src="imagenes/personaje-base.jpg"
+            alt=""
+        >
+
+        <img
+            id="personajeB"
+            class="personaje"
+            src="imagenes/personaje-base.jpg"
+            alt=""
+        >
+    </div>
+
 </main>
+
+
+<!-- VENTANA DE AYUDA -->
+
+<section id="ayuda" aria-label="Ayuda del TV Box">
+
+    <div class="ventana-ayuda">
+
+        <header class="cabecera-ayuda">
+            <h1>Ayuda del TV Box</h1>
+        </header>
+
+        <div class="contenido-ayuda" id="contenidoAyuda">
+
+            <!-- 1. CONTROLES DIGITALES -->
+
+            <h2>Botones digitales del TV Box</h2>
+
+            <p>
+                Estos botones permiten controlar distintas funciones
+                del TV Box.
+            </p>
+
+            <img
+                class="imagen-controles"
+                src="imagenes/botones-android.jpg"
+                alt="Barra de botones digitales del TV Box"
+            >
+
+            <div class="iconos-android">
+
+                <div class="icono-android">
+                    <img src="imagenes/boton 1.jpg" alt="">
+                    <span><strong>Captura de pantalla:</strong>
+                    guarda una imagen de lo que aparece en pantalla.</span>
+                </div>
+
+                <div class="icono-android">
+                    <img src="imagenes/boton 2.jpg" alt="">
+                    <span><strong>Volver atrás:</strong>
+                    regresa a la pantalla anterior.</span>
+                </div>
+
+                <div class="icono-android">
+                    <img src="imagenes/boton 3.jpg" alt="">
+                    <span><strong>Pantalla principal:</strong>
+                    vuelve a la pantalla principal del TV Box.</span>
+                </div>
+
+                <div class="icono-android">
+                    <img src="imagenes/boton 4.jpg" alt="">
+                    <span><strong>Aplicaciones recientes:</strong>
+                    muestra las aplicaciones abiertas para poder cerrarlas.</span>
+                </div>
+
+                <div class="icono-android">
+                    <img src="imagenes/boton 5.jpg" alt="">
+                    <span><strong>Bajar volumen:</strong>
+                    reduce el sonido.</span>
+                </div>
+
+                <div class="icono-android">
+                    <img src="imagenes/boton 6.jpg" alt="">
+                    <span><strong>Subir volumen:</strong>
+                    aumenta el sonido.</span>
+                </div>
+
+                <div class="icono-android">
+                    <img src="imagenes/boton 7.jpg" alt="">
+                    <span><strong>Apagar:</strong>
+                    abre o activa la función de apagado del equipo.</span>
+                </div>
+
+                <div class="icono-android">
+                    <img src="imagenes/boton 8.jpg" alt="">
+                    <span><strong>Ocultar barra:</strong>
+                    esconde la barra de botones para dejar más espacio
+                    en la pantalla.</span>
+                </div>
+
+            </div>
+
+            <p>
+                <strong>¿Cómo volver a ver la barra?</strong>
+                Si la barra desaparece, apoye el mouse en el borde
+                inferior de la pantalla y arrástrelo desde abajo hacia
+                arriba para volver a mostrarla.
+            </p>
+
+
+            <!-- 2. WIFI -->
+
+            <h2>📶 2. Cómo reconectar el Wi-Fi</h2>
+
+            <p>
+                Si una página no carga o internet deja de responder,
+                puede apagar y volver a encender el Wi-Fi.
+            </p>
+
+            <ol>
+                <li>
+                    Haga clic en el botón de Wi-Fi que está arriba
+                    a la derecha.
+                </li>
+                <li>
+                    Espere unos segundos con el Wi-Fi desactivado.
+                </li>
+                <li>
+                    Haga clic nuevamente en el botón para activarlo.
+                </li>
+            </ol>
+
+            <p>
+                El equipo debería volver a conectarse automáticamente
+                a la red guardada. No hace falta buscar la red ni
+                escribir la contraseña otra vez.
+            </p>
+
+
+            <!-- 3. CHROME -->
+
+           <h2>🌐 3. Chrome: botones, pestañas y cómo salir</h2>
+
+<p>
+    Chrome es el navegador de internet. Permite abrir páginas web,
+    buscar información y entrar a sitios como Google y YouTube.
+    La barra superior contiene la dirección de la página y los
+    controles para navegar entre pestañas.
+</p>
+
+<img
+    class="imagen-encabezado-chrome"
+    src="imagenes/encabezado-chrome.jpg"
+    alt="Barra superior de Google Chrome"
+>
+
+<h3>🏠 Casita: pantalla principal</h3>
+
+<p>
+    Abre la página de inicio configurada en Chrome. En este equipo
+    se configuró para mostrar esta pantalla principal.
+</p>
+
+<p>
+    <strong>✅ Si toca la casita y vuelve a ver esta pantalla,
+    está funcionando correctamente.</strong>
+</p>
+
+<h3>← Flecha hacia atrás</h3>
+
+<p>
+    Vuelve a la página anterior de la pestaña actual. No es lo mismo
+    que la casita: la casita abre la pantalla principal.
+</p>
+
+<h3>⟳ Recargar</h3>
+
+<p>
+    Vuelve a cargar la página actual. Puede usarlo cuando una página
+    no termina de abrirse.
+</p>
+
+<h3>⭐ Favoritos</h3>
+
+<p>
+    Permite guardar páginas para encontrarlas fácilmente más adelante.
+</p>
+
+<h3>⬇ Descargas</h3>
+
+<p>
+    Muestra los archivos que descargaste desde Chrome, como imágenes
+    o documentos.
+</p>
+
+<h3>▢ Número de pestañas</h3>
+
+<p>
+    Muestra cuántas pestañas están abiertas. Haga clic para verlas,
+    cambiar entre ellas o cerrar las que ya no necesita.
+</p>
+
+<h3>📑 Cómo cerrar una pestaña</h3>
+
+<ol>
+    <li>Presione la X o...</li>
+    <li>Haga clic en el botón con el número de pestañas.</li>
+    <li>Busque la pestaña que desea cerrar.</li>
+    <li>Haga clic en la X de esa pestaña.</li>
+    <li>Repita el procedimiento con las demás que desee cerrar.</li>
+</ol>
+
+<h3>🚪 Cómo cerrar Chrome</h3>
+
+<ol>
+    <li>
+        Presione el botón en forma de cuadrado ubicado en la parte
+        inferior de la pantalla para ver las aplicaciones recientes.
+    </li>
+    <li>Busque la aplicación de Chrome.</li>
+    <li>Si aparece una X o una opción para cerrar, utilícela.</li>
+</ol>
+
+
+            <!-- 4. YOUTUBE -->
+
+            <h2>▶ 4. YouTube y YouTube Music</h2>
+
+            <p>
+                Entre a YouTube y YouTube Music desde sus páginas
+                web, usando Chrome.
+            </p>
+
+            <p>
+                A veces, al abrir esos enlaces, Android intenta
+                abrir una aplicación instalada en lugar de mantener
+                la página en Chrome. Si sucede, revisá los ajustes
+                de aplicaciones y de apertura de enlaces para ver
+                si puede evitar que el sistema abra automáticamente
+                la aplicación.
+            </p>
+
+            <p>
+                También puede escribir la dirección del sitio
+                directamente en la barra de Chrome:
+            </p>
+
+            <ul>
+                <li><strong>YouTube:</strong> www.youtube.com</li>
+                <li><strong>YouTube Music:</strong> music.youtube.com</li>
+            </ul>
+
+            <p>
+                Como el navegador es antiguo, algunas funciones
+                de las páginas actuales pueden no funcionar
+                correctamente.
+            </p>
+
+
+            <!-- 5. VERSIONES -->
+
+            <h2>ℹ️ 5. Versiones y compatibilidad</h2>
+
+            <p>
+                El TV Box utiliza versiones antiguas de Android
+                y del navegador. Algunas páginas modernas pueden
+                tardar en cargar, mostrar errores o no ofrecer
+                todas sus funciones.
+            </p>
+
+            <ul>
+                <li><strong>Android:</strong> 7.1.1</li>
+                <li><strong>Chrome:</strong> 101.0.4951.61</li>
+                <li><strong>YouTube Music:</strong> 6.42.52</li>
+            </ul>
+
+            <p>
+                Por eso, un problema con una página no significa
+                necesariamente que el Wi-Fi esté desconectado.
+                También puede deberse a que el sitio ya no sea
+                totalmente compatible con este equipo.
+            </p>
+
+
+            <!-- 6. SMARTTUBE -->
+
+            <h2>📺 6. SmartTube</h2>
+
+            <p>
+                SmartTube es una aplicación de YouTube pensada
+                para televisores y dispositivos Android TV.
+                Tiene una interfaz adaptada a pantallas grandes
+                y permite navegar por los videos con mayor comodidad.
+            </p>
+
+            <p>
+                Según la versión y su configuración, puede ofrecer
+                funciones adicionales de reproducción y opciones
+                relacionadas con los anuncios.
+            </p>
+
+            <p>
+                <strong>Recomendación:</strong> use el control remoto
+                para navegar por los menús y seleccionar videos.
+                También puede utilizar el mouse. Si necesita volver
+                a otra pantalla o cerrar una aplicación, recurra
+                a los botones digitales del TV Box.
+            </p>
+
+
+            <!-- 7. CONSEJOS -->
+
+            <h2>💡 7. Consejos rápidos</h2>
+
+            <ul>
+                <li>
+                    Si una página no responde, espere unos segundos
+                    antes de hacer clic nuevamente.
+                </li>
+                <li>
+                    Para cerrar una pestaña, use la X que aparece
+                    en esa pestaña.
+                </li>
+                <li>
+                    Para salir de una aplicación, use el botón
+                    cuadrado de aplicaciones recientes.
+                </li>
+                <li>
+                    Si internet deja de funcionar, apague y encienda
+                    el Wi-Fi siguiendo las instrucciones de esta ayuda.
+                </li>
+                <li>
+                    Para volver a esta pantalla principal, use el
+                    acceso correspondiente.
+                </li>
+            </ul>
+
+        </div>
+
+        <button class="boton-volver"
+                type="button"
+                id="volverPrincipal">
+            ← Volver a la pantalla principal
+        </button>
+
+    </div>
+
+</section>
+
+
+<script>
+(function () {
+    "use strict";
+
+    var personajeA = document.getElementById("personajeA");
+    var personajeB = document.getElementById("personajeB");
+    var botonAyuda = document.getElementById("abrirAyuda");
+    var botonVolver = document.getElementById("volverPrincipal");
+    var ventanaAyuda = document.getElementById("ayuda");
+    var contenidoAyuda = document.getElementById("contenidoAyuda");
+
+    var imagenVisible = personajeA;
+    var imagenOculta = personajeB;
+    var temporizadorPersonaje = null;
+    var solicitudImagen = 0;
+
+    var imagenBase = "imagenes/personaje-base.jpg";
+
+    /*
+       CAMBIO DE PERSONAJE
+       Se utiliza un número de solicitud para evitar que una imagen
+       anterior termine de cargar y sobrescriba la más reciente.
+    */
+
+    function cambiarPersonaje(ruta) {
+        if (!ruta) {
+            ruta = imagenBase;
+        }
+
+        solicitudImagen++;
+
+        var miSolicitud = solicitudImagen;
+
+        if (temporizadorPersonaje !== null) {
+            clearTimeout(temporizadorPersonaje);
+            temporizadorPersonaje = null;
+        }
+
+        if (imagenVisible.getAttribute("src") === ruta) {
+            return;
+        }
+
+        var destino = imagenOculta;
+
+        destino.onload = null;
+        destino.onerror = null;
+
+        function imagenCargada() {
+            if (miSolicitud !== solicitudImagen) {
+                return;
+            }
+
+            destino.onload = null;
+            destino.onerror = null;
+
+            destino.className = "personaje activo";
+            imagenVisible.className = "personaje";
+
+            var imagenAnterior = imagenVisible;
+            imagenVisible = destino;
+            imagenOculta = imagenAnterior;
+        }
+
+        destino.onload = imagenCargada;
+
+        destino.onerror = function () {
+            if (miSolicitud === solicitudImagen) {
+                destino.onload = null;
+                destino.onerror = null;
+            }
+        };
+
+        destino.src = ruta;
+
+        /*
+           Si la imagen ya está en caché, puede haber terminado
+           de cargar antes de asignar el evento.
+        */
+        if (destino.complete && destino.naturalWidth > 0) {
+            imagenCargada();
+        }
+    }
+
+    /*
+       RESTAURAR SIEMPRE LA IMAGEN BASE
+       Se fuerza la imagen base al regresar desde otra página,
+       al recuperar el foco y al volver a mostrar esta ventana.
+    */
+
+    function restaurarPersonajeBase() {
+        if (ventanaAyuda.className.indexOf("visible") !== -1) {
+            return;
+        }
+
+        cambiarPersonaje(imagenBase);
+    }
+
+    window.addEventListener("pageshow", function () {
+        restaurarPersonajeBase();
+    });
+
+    window.addEventListener("focus", function () {
+        restaurarPersonajeBase();
+    });
+
+    document.addEventListener("visibilitychange", function () {
+        if (!document.hidden) {
+            restaurarPersonajeBase();
+        }
+    });
+
+    /*
+       LOS ACCESOS CON PERSONAJE CAMBIAN LA IMAGEN AL PASAR
+       EL MOUSE. LOS DEMÁS ACCESOS MANTIENEN EL PERSONAJE BASE.
+    */
+
+    var botonesConPersonaje =
+        document.querySelectorAll(".menu .boton[data-personaje]");
+
+    for (var i = 0; i < botonesConPersonaje.length; i++) {
+        (function (boton) {
+            boton.addEventListener("mouseenter", function () {
+                if (ventanaAyuda.className.indexOf("visible") !== -1) {
+                    return;
+                }
+
+                cambiarPersonaje(boton.getAttribute("data-personaje"));
+            });
+
+            boton.addEventListener("mouseleave", function () {
+                if (ventanaAyuda.className.indexOf("visible") !== -1) {
+                    return;
+                }
+
+                temporizadorPersonaje = setTimeout(function () {
+                    cambiarPersonaje(imagenBase);
+                }, 350);
+            });
+
+            boton.addEventListener("focus", function () {
+                if (ventanaAyuda.className.indexOf("visible") === -1) {
+                    cambiarPersonaje(boton.getAttribute("data-personaje"));
+                }
+            });
+
+            boton.addEventListener("blur", function () {
+                if (ventanaAyuda.className.indexOf("visible") === -1) {
+                    cambiarPersonaje(imagenBase);
+                }
+            });
+        })(botonesConPersonaje[i]);
+    }
+
+    /*
+       AYUDA INTERNA
+    */
+
+    function abrirAyuda() {
+        ventanaAyuda.className = "visible";
+        contenidoAyuda.scrollTop = 0;
+    }
+
+    function cerrarAyuda() {
+        ventanaAyuda.className = "";
+        restaurarPersonajeBase();
+    }
+
+    botonAyuda.addEventListener("click", abrirAyuda);
+    botonVolver.addEventListener("click", cerrarAyuda);
+
+    /*
+       PRECARGAR LAS IMÁGENES DE PERSONAJES PARA QUE
+       EL CAMBIO SEA MÁS FLUIDO.
+    */
+
+    var rutasPersonajes = [
+        "imagenes/personaje-base.jpg",
+        "imagenes/youtube-music.jpg",
+        "imagenes/youtube.jpg",
+        "imagenes/google.jpg",
+        "imagenes/anses.jpg",
+        "imagenes/calculadora.jpg",
+        "imagenes/clima.jpg",
+        "imagenes/noticias.jpg",
+        "imagenes/ayuda.jpg"
+    ];
+
+    for (var j = 0; j < rutasPersonajes.length; j++) {
+        var precarga = new Image();
+        precarga.src = rutasPersonajes[j];
+    }
+
+})();
+</script>
+
 </body>
 </html>
